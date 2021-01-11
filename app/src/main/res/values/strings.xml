@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Kody kreskowe</string>
+    <string name="czytnik_kod_w_kreskowych">Czytnik kodów kreskowych</string>
+    <string name="menu">Menu</string>
+    <string name="settings">Ustawienia</string>
+    <string name="zmien">Zmień język</string>
+    <string name="mainMenu">Menu Główne</string>
+    <string name="pol">Polski</string>
+    <string name="ang">Angielski</string>
+    <string name="jezyk">Język</string>
+    <string name="enterCode">Wpisz kod kreskowy</string>
+    <string name="search">Wyszukaj</string>
+    <string name="Story">Historia wyszukiwań</string>
+    <string name="error1">Wpisz coś w pole tekstowe</string>
+    <string name="success">Poprawnie dodano dane</string>
+    <string name="error2">Coś poszło nie tak</string>
+    <string name="error3">Baza danych jest pusta</string>
+    <string name="result">Rezultat</string>
+    <string name="error4">Nie zeskanowałeś żadnego kodu</string>
+    <string name="scan">Skanuj</string>
+    <string name="szer">Sz:</string>
+    <string name="dlug">Dł:</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BarCodes</string>
+    <string name="czytnik_kod_w_kreskowych">Bar Codes Reader</string>
+    <string name="menu">Menu</string>
+    <string name="settings">Settings</string>
+    <string name="zmien">Change language</string>
+    <string name="mainMenu">Main Menu</string>
+    <string name="pol">Polish</string>
+    <string name="ang">English</string>
+    <string name="jezyk">Language</string>
+    <string name="enterCode">Enter Barcode</string>
+    <string name="search">Search</string>
+    <string name="Story">Search Story</string>
+    <string name="error1">"Please enter barcode to  text field "</string>
+    <string name="success">Successfully added data</string>
+    <string name="error2">Something went wrong</string>
+    <string name="error3">Database is empty</string>
+    <string name="result">Result</string>
+    <string name="error4">You didn\'t scan anything</string>
+    <string name="scan">Scan</string>
+    <string name="szer">Lat:</string>
+    <string name="dlug">Lon:</string>
+</resources>
