@@ -32,7 +32,7 @@ public class Story extends AppCompatActivity { //Klasa odpowiedzialna za Activit
             while(data.moveToNext()) //ładowanie danych aż do końca
             {
                 theList.add(data.getString(1));
-                ListAdapter listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_2,theList);
+                ListAdapter listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, theList);
                 listView.setAdapter(listAdapter);
             }
         }

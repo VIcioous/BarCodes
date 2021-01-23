@@ -67,8 +67,9 @@ public class Settings extends AppCompatActivity {
     }
     public void loadLocale(){ //załadowanie konkretnego języka
         SharedPreferences prefs = getSharedPreferences("Settings", Activity.MODE_PRIVATE);
-        String lang =prefs.getString("Mój język","");
-        setLanguage(lang);
+        String lang = prefs.getString("Mój język","");
+        if(!lang.isEmpty())
+            setLanguage(lang);
     }
 
 }

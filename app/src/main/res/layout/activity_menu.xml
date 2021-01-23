@@ -38,7 +38,7 @@
         android:id="@+id/textbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enterCode"
+        android:hint="@string/enterCode"
         android:textAlignment="center"
 
         android:translationY="223dp"

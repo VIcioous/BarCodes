@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -14,7 +15,9 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,9 +30,20 @@ import com.google.android.gms.tasks.Task;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 
 public class menu extends AppCompatActivity {
@@ -37,8 +51,9 @@ public class menu extends AppCompatActivity {
     EditText editText; //pole tekstowe
     DBHelper dbHelper; //instancja bazy danych
     FusedLocationProviderClient fusedLocationProviderClient; //instancja lokalizacji
+    ProgressDialog pd;
 
-    String dane,wx,wy,miasto; // po kolei: kod wpisany/otrzymany z czytnika,współrzedna x, współrzedna y, miasto z lokalizacji
+    String dane, wx, wy, miasto; // po kolei: kod wpisany/otrzymany z czytnika,współrzedna x, współrzedna y, miasto z lokalizacji
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +74,17 @@ public class menu extends AppCompatActivity {
             public void onClick(View v) {
                 Coordinates(); //aktualizacja koordynatów
                 String text = editText.getText().toString();
-                //Bartek, Tutaj będzie trzeba zrobić połączenie z API
-                text=text+" "+getResources().getString(R.string.szer) +wx+" "+getResources().getString(R.string.dlug)  +wy+ " "+miasto; //zbindowanie tekstu
-                addData(text); //dodanie do bazy danych tekstu
-                editText.setText(""); //wyczyszczenie pola
+                if(!text.isEmpty()) {
+                    String str = "https://api.barcodable.com/api/v1/upc/" + text;
+
+                    dataToInsert = editText.getText().toString() + " " + getResources().getString(R.string.szer) +
+                            " " + wx + " " + getResources().getString(R.string.dlug) + " " + wy + " " + miasto;
+
+                    JsonTask task = new JsonTask();
+                    task.execute(str);
+
+                    editText.setText(""); //wyczyszczenie pola
+                }
             }
         });
 
@@ -122,31 +144,27 @@ public class menu extends AppCompatActivity {
 
     }
 
+    private String dataToInsert;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { //po zakończeniu skanowania
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult intentResult =IntentIntegrator.parseActivityResult(requestCode,resultCode,data);
 
-        if(intentResult.getContents()!=null)
+        if(intentResult.getContents() != null)
         {
-            //builder odpowiedzialny za wyświetlenie okienka z informacją dotyczącą kodu kreskowego lub QR, będzie można tą częśc usunąć finalnie
-            AlertDialog.Builder builder = new AlertDialog.Builder(menu.this);
-            builder.setTitle(getResources().getString(R.string.result));
-            builder.setMessage(intentResult.getContents());
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
             //przetworzenie danych do stringów
-            dane=intentResult.getContents().toString();
-            builder.show();
+            dane = intentResult.getContents().toString();
             //Bartek, Tutaj będzie trzeba zrobić połączenie z API
-            dane=dane+getResources().getString(R.string.szer) +wx+getResources().getString(R.string.dlug)  +wy+ " "+miasto;//bindowanie
-            addData(dane); //dodawanie do bazy rekordu
-            editText.setText("");
-        }else
+
+            String str = "https://api.barcodable.com/api/v1/upc/" + dane;
+            dataToInsert = dane + " " + getResources().getString(R.string.szer) +
+                    " " + wx + " " + getResources().getString(R.string.dlug) + " " + wy + " " + miasto;
+
+            JsonTask task = new JsonTask();
+            task.execute(str);
+        }
+        else
             Toast.makeText(getApplicationContext(),getResources().getString(R.string.error4),Toast.LENGTH_SHORT).show(); //wyświetlenie info że nic sie nie zeskanowało
     }
 
@@ -160,7 +178,103 @@ public class menu extends AppCompatActivity {
         boolean insert = dbHelper.addData(newRecord);
     }
 
+    private class JsonTask extends AsyncTask<String, String, JSONObject> {
 
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pd = new ProgressDialog(menu.this);
+            pd.setMessage(getResources().getString(R.string.wait));
+            pd.setCancelable(false);
+            pd.show();
+        }
+
+        protected JSONObject doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line = "";
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                }
+
+                JSONObject jsonResult = new JSONObject(buffer.toString());
+
+                return jsonResult;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject result) {
+            super.onPostExecute(result);
+
+            if (pd.isShowing()){
+                pd.dismiss();
+            }
+
+            if(result == null){
+                dataToInsert += " " + getResources().getString(R.string.notfound);
+            }
+            else {
+
+                try {
+                    if (result.getString("message").contentEquals("OK")) {
+                        dataToInsert += " " + result.getJSONObject("item").getJSONArray("matched_items").getJSONObject(0).getString("title"); //bindowanie
+                    } else
+                        dataToInsert += " " + result.getString("message");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                    Log.e("App", "yourDataTask", e);
+                    dataToInsert = "";
+                }
+            }
+            addData(dataToInsert); //dodanie do bazy danych tekstu
+            AlertDialog.Builder builder = new AlertDialog.Builder(menu.this);
+            builder.setTitle(getResources().getString(R.string.result));
+            builder.setMessage(dataToInsert);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+
+            dataToInsert = "";
+        }
+    }
 
 
 

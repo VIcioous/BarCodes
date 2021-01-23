@@ -30,20 +30,22 @@ public class MainActivity extends AppCompatActivity {
                 toSettings();
             }
         });
-
+    }
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        recreate();
     }
 
-public void toMenu() //przejście do widoku menu głównego
-{
-    Intent intent = new Intent(this,menu.class);
-    startActivity(intent);
-}
-
-    public void toSettings() //przejście do ustawień
+    public void toMenu() //przejście do widoku menu głównego
     {
-        Intent intent = new Intent(this,Settings.class);
+        Intent intent = new Intent(this, menu.class);
         startActivity(intent);
     }
 
-
+    public void toSettings() //przejście do ustawień
+    {
+        Intent intent = new Intent(this, Settings.class);
+        startActivity(intent);
+    }
 }

@@ -16,6 +16,8 @@
     <string name="error2">Coś poszło nie tak</string>
     <string name="error3">Baza danych jest pusta</string>
     <string name="result">Rezultat</string>
+    <string name="notfound">Nie znaleziono produktu</string>
+    <string name="wait">Proszę czekać</string>
     <string name="error4">Nie zeskanowałeś żadnego kodu</string>
     <string name="scan">Skanuj</string>
     <string name="szer">Sz:</string>
